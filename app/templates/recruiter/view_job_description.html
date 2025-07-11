@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Job Description Details</h1>
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">{{ jd.title }} at {{ jd.company }}</h3>
+                    <a href="{{ url_for('recruiter.rank_resumes', jd_id=jd.id) }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-list-ol me-2"></i> View Ranked Resumes
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Basic Information</h4>
+                        <table class="table">
+                            <tr>
+                                <th>Title</th>
+                                <td>{{ jd.title }}</td>
+                            </tr>
+                            <tr>
+                                <th>Company</th>
+                                <td>{{ jd.company }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date Added</th>
+                                <td>{{ jd.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Required Skills</h4>
+                        <div class="mb-3">
+                            {% if jd.parsed_data.skills %}
+                                {% for skill in jd.parsed_data.skills %}
+                                    <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No specific skills detected</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4>Education Requirements</h4>
+                        {% if jd.parsed_data.education %}
+                            {% for edu in jd.parsed_data.education %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p>{{ edu.text }}</p>
+                                        {% if edu.institutions %}
+                                            <strong>Institutions:</strong>
+                                            {% for inst in edu.institutions %}
+                                                <span class="badge bg-secondary me-2">{{ inst }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if edu.years %}
+                                            <div><strong>Years:</strong> {{ edu.years|join(', ') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No specific education requirements detected</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Experience Requirements</h4>
+                        {% if jd.parsed_data.experience %}
+                            {% for exp in jd.parsed_data.experience %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p>{{ exp.text }}</p>
+                                        {% if exp.organizations %}
+                                            <strong>Organizations:</strong>
+                                            {% for org in exp.organizations %}
+                                                <span class="badge bg-secondary me-2">{{ org }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if exp.job_titles %}
+                                            <div><strong>Titles:</strong> {{ exp.job_titles|join(', ') }}</div>
+                                        {% endif %}
+                                        {% if exp.years %}
+                                            <div><strong>Years:</strong> {{ exp.years|join(', ') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No specific experience requirements detected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h4>Full Description</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="mb-0">{{ jd.description|replace('\n', '<br>')|safe }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

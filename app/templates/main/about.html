@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">About SmartHire</h1>
+        <p class="lead">
+            SmartHire is an automated resume screening and ranking system that uses advanced Natural Language Processing (NLP) 
+            and machine learning techniques to match job applicants with job descriptions.
+        </p>
+        
+        <h2 class="mt-5">Our Mission</h2>
+        <p>
+            Our mission is to streamline the hiring process by automating the initial screening of resumes, 
+            allowing recruiters to focus on the most qualified candidates and helping job seekers find positions 
+            that match their skills and experience.
+        </p>
+        
+        <h2 class="mt-5">How It Works</h2>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>For Job Applicants</h4>
+                <ol>
+                    <li>Create an account and upload your resume (PDF or DOCX)</li>
+                    <li>Our system parses your resume and extracts key information</li>
+                    <li>Your resume is vectorized and stored for matching</li>
+                    <li>Recruiters can find your resume when it matches their job descriptions</li>
+                </ol>
+            </div>
+            <div class="col-md-6">
+                <h4>For Recruiters</h4>
+                <ol>
+                    <li>Create an account and upload job descriptions</li>
+                    <li>Our system parses and vectorizes the job requirements</li>
+                    <li>Resumes are automatically ranked by relevance to your job</li>
+                    <li>View detailed insights about each candidate's match</li>
+                </ol>
+            </div>
+        </div>
+        
+        <h2 class="mt-5">Technology</h2>
+        <p>
+            SmartHire uses state-of-the-art NLP techniques including:
+        </p>
+        <ul>
+            <li>Resume parsing with spaCy and NLTK</li>
+            <li>Text vectorization using TF-IDF and word embeddings</li>
+            <li>Cosine similarity for matching resumes to job descriptions</li>
+            <li>Machine learning for continuous improvement of matching algorithms</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

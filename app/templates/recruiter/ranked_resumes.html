@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Ranked Resumes</h1>
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">{{ jd.title }} at {{ jd.company }}</h3>
+                    <a href="{{ url_for('recruiter.view_job_description', jd_id=jd.id) }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-eye me-2"></i> View Job Description
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Resumes are ranked by their similarity to your job description. Click on a resume to view detailed insights.
+                </div>
+                
+                {% if ranked_resumes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Applicant</th>
+                                    <th>Match Score</th>
+                                    <th>Skills Match</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resume in ranked_resumes %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ resume.user_name }}</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ (resume.similarity_score * 100)|round }}%">
+                                                    {{ (resume.similarity_score * 100)|round }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ resume.skills_match_percentage|round }}%">
+                                                    {{ resume.skills_match_percentage|round }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('recruiter.resume_insights', jd_id=jd.id, resume_id=resume.resume_id) }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-chart-bar me-1"></i> Insights
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> No resumes found in the system or no matches available.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Required Skills Summary</h3>
+            </div>
+            <div class="card-body">
+                <h5>Skills Required for This Position:</h5>
+                <div class="mb-4">
+                    {% if jd.parsed_data.skills %}
+                        {% for skill in jd.parsed_data.skills %}
+                            <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No specific skills detected in job description</p>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

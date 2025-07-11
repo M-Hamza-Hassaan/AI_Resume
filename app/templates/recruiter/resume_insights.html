@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Resume Insights</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">Match Analysis</h3>
+                    <a href="{{ url_for('recruiter.rank_resumes', jd_id=jd.id) }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Rankings
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>{{ resume.parsed_data.get('name', 'Applicant') }}</h4>
+                        <p class="text-muted">Resume uploaded on {{ resume.upload_date.strftime('%Y-%m-%d') }}</p>
+                        
+                        <h5 class="mt-4">Overall Match Score</h5>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ (insights.similarity_score * 100)|round }}%">
+                                {{ (insights.similarity_score * 100)|round }}%
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-4">Skills Match</h5>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ insights.skills_match_percentage|round }}%">
+                                {{ insights.skills_match_percentage|round }}%
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-4">Education Match</h5>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar {{ 'bg-success' if insights.education_match.match else 'bg-warning' }}" role="progressbar" style="width: {{ (insights.education_match.score * 100)|round }}%">
+                                {{ (insights.education_match.score * 100)|round }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">{{ insights.education_match.details }}</p>
+                        
+                        <h5 class="mt-4">Experience Match</h5>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar {{ 'bg-success' if insights.experience_match.match else 'bg-warning' }}" role="progressbar" style="width: {{ (insights.experience_match.score * 100)|round }}%">
+                                {{ (insights.experience_match.score * 100)|round }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">{{ insights.experience_match.details }}</p>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">Skills Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6>Matching Skills ({{ insights.matching_skills|length }})</h6>
+                                <div class="mb-3">
+                                    {% if insights.matching_skills %}
+                                        {% for skill in insights.matching_skills %}
+                                            <span class="badge bg-success me-2 mb-2">{{ skill }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No matching skills found</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <h6 class="mt-4">Missing Skills ({{ insights.missing_skills|length }})</h6>
+                                <div class="mb-3">
+                                    {% if insights.missing_skills %}
+                                        {% for skill in insights.missing_skills %}
+                                            <span class="badge bg-danger me-2 mb-2">{{ skill }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No missing skills - candidate has all required skills!</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <h6 class="mt-4">Additional Skills</h6>
+                                <div>
+                                    {% set additional_skills = [] %}
+                                    {% for skill in resume.parsed_data.get('skills', []) %}
+                                        {% if skill not in insights.matching_skills %}
+                                            {% set _ = additional_skills.append(skill) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if additional_skills %}
+                                        {% for skill in additional_skills %}
+                                            <span class="badge bg-info me-2 mb-2">{{ skill }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No additional skills detected</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Education</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if resume.parsed_data.education %}
+                            {% for edu in resume.parsed_data.education %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p>{{ edu.text }}</p>
+                                        {% if edu.institutions %}
+                                            <strong>Institutions:</strong>
+                                            {% for inst in edu.institutions %}
+                                                <span class="badge bg-secondary me-2">{{ inst }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if edu.years %}
+                                            <div><strong>Years:</strong> {{ edu.years|join(', ') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No education information detected</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Experience</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if resume.parsed_data.experience %}
+                            {% for exp in resume.parsed_data.experience %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p>{{ exp.text }}</p>
+                                        {% if exp.organizations %}
+                                            <strong>Organizations:</strong>
+                                            {% for org in exp.organizations %}
+                                                <span class="badge bg-secondary me-2">{{ org }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if exp.job_titles %}
+                                            <div><strong>Titles:</strong> {{ exp.job_titles|join(', ') }}</div>
+                                        {% endif %}
+                                        {% if exp.years %}
+                                            <div><strong>Years:</strong> {{ exp.years|join(', ') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No experience information detected</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('recruiter.rank_resumes', jd_id=jd.id) }}" class="btn btn-primary">Back to Rankings</a>
+            <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Resume Details</h1>
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">{{ current_user.name }}'s Resume</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Basic Information</h4>
+                        <table class="table">
+                            <tr>
+                                <th>Name</th>
+                                <td>{{ current_user.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ resume.parsed_data.email or current_user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone</th>
+                                <td>{{ resume.parsed_data.phone or 'Not detected' }}</td>
+                            </tr>
+                            <tr>
+                                <th>File</th>
+                                <td>{{ resume.filename }}</td>
+                            </tr>
+                            <tr>
+                                <th>Uploaded</th>
+                                <td>{{ resume.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Skills</h4>
+                        <div class="mb-3">
+                            {% if resume.parsed_data.skills %}
+                                {% for skill in resume.parsed_data.skills %}
+                                    <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No skills detected</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4>Education</h4>
+                        {% if resume.parsed_data.education %}
+                            {% for edu in resume.parsed_data.education %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p>{{ edu.text }}</p>
+                                        {% if edu.institutions %}
+                                            <strong>Institutions:</strong>
+                                            {% for inst in edu.institutions %}
+                                                <span class="badge bg-secondary me-2">{{ inst }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if edu.years %}
+                                            <div><strong>Years:</strong> {{ edu.years|join(', ') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No education information detected</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Experience</h4>
+                        {% if resume.parsed_data.experience %}
+                            {% for exp in resume.parsed_data.experience %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p>{{ exp.text }}</p>
+                                        {% if exp.organizations %}
+                                            <strong>Organizations:</strong>
+                                            {% for org in exp.organizations %}
+                                                <span class="badge bg-secondary me-2">{{ org }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if exp.job_titles %}
+                                            <div><strong>Titles:</strong> {{ exp.job_titles|join(', ') }}</div>
+                                        {% endif %}
+                                        {% if exp.years %}
+                                            <div><strong>Years:</strong> {{ exp.years|join(', ') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No experience information detected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{{ url_for('applicant.upload_resume') }}" class="btn btn-primary">Update Resume</a>
+                    <a href="{{ url_for('applicant.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

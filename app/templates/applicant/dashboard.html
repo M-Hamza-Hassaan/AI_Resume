@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Applicant Dashboard</h1>
+        <p class="lead">Welcome, {{ current_user.name }}!</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Resume Status</h3>
+            </div>
+            <div class="card-body">
+                {% if resume %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i> Resume uploaded
+                    </div>
+                    <p><strong>Filename:</strong> {{ resume.filename }}</p>
+                    <p><strong>Uploaded:</strong> {{ resume.upload_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><strong>Skills detected:</strong> {{ resume.parsed_data.skills|length }}</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('applicant.view_resume') }}" class="btn btn-primary">View Resume Details</a>
+                        <a href="{{ url_for('applicant.upload_resume') }}" class="btn btn-outline-primary">Update Resume</a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> No resume uploaded
+                    </div>
+                    <p>Upload your resume to be matched with job opportunities.</p>
+                    <div class="d-grid">
+                        <a href="{{ url_for('applicant.upload_resume') }}" class="btn btn-primary">Upload Resume</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Tips for Better Matching</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-file-alt me-2 text-primary"></i> Resume Format</h5>
+                        <ul>
+                            <li>Use a clean, professional format</li>
+                            <li>Include a clear summary or objective</li>
+                            <li>List skills explicitly</li>
+                            <li>Use industry-standard job titles</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-lightbulb me-2 text-primary"></i> Content Tips</h5>
+                        <ul>
+                            <li>Use keywords relevant to your industry</li>
+                            <li>Quantify achievements when possible</li>
+                            <li>Update your resume regularly</li>
+                            <li>Tailor your resume for specific job types</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i> Our AI analyzes your resume to extract skills, education, and experience. The more clearly these are presented, the better your matching results will be.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

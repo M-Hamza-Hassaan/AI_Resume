@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">Upload Resume</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label class="form-label">Resume File (PDF or DOCX)</label>
+                        <div class="input-group">
+                            {% if form.resume.errors %}
+                                {{ form.resume(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.resume.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.resume(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-text">Supported formats: PDF, DOCX</div>
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i> Our system will parse your resume to extract skills, education, and experience information. For best results, use a standard resume format.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
