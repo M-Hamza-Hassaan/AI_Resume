@@ -1,9 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user
 
-main = Blueprint('main  render_template, redirect, url_for', __name__)
-from flask_login import current_user
-
 main = Blueprint('main', __name__)
 
 @main.route('/')
@@ -14,8 +11,8 @@ def index():
         else:
             return redirect(url_for('recruiter.dashboard'))
     
-    return render_template('main/index.html', title='SmartHire')
+    return render_template('main/index.html', title='airesume')
 
 @main.route('/about')
 def about():
-    return render_template('main/about.html', title='About SmartHire')
+    return render_template('main/about.html', title='About airesume')

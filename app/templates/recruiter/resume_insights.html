@@ -3,8 +3,18 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h1 class="mb-4">Resume Insights</h1>
-        
+        <h1 class="mb-4">Resume Insights — XAI Analysis</h1>
+
+        <!-- XAI Banner -->
+        <div class="alert {{ 'alert-success' if sbert_enabled else 'alert-info' }} mb-3">
+            <i class="fas fa-brain me-2"></i>
+            <strong>Explainable AI Active:</strong>
+            Score breakdown, skill gap analysis, and fairness audit enabled.
+            {% if sbert_enabled %}
+                <span class="badge bg-success ms-2"><i class="fas fa-shield-alt me-1"></i>Fairness: Anonymized</span>
+            {% endif %}
+        </div>
+
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
@@ -16,81 +26,211 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <!-- Left: Scores -->
                     <div class="col-md-6">
                         <h4>{{ resume.parsed_data.get('name', 'Applicant') }}</h4>
                         <p class="text-muted">Resume uploaded on {{ resume.upload_date.strftime('%Y-%m-%d') }}</p>
-                        
-                        <h5 class="mt-4">Overall Match Score</h5>
-                        <div class="progress mb-3" style="height: 25px;">
+
+                        <!-- Combined Score -->
+                        <h5 class="mt-4">Combined Match Score</h5>
+                        <div class="progress mb-2" style="height: 25px;">
                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ (insights.similarity_score * 100)|round }}%">
                                 {{ (insights.similarity_score * 100)|round }}%
                             </div>
                         </div>
-                        
-                        <h5 class="mt-4">Skills Match</h5>
-                        <div class="progress mb-3" style="height: 25px;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ insights.skills_match_percentage|round }}%">
-                                {{ insights.skills_match_percentage|round }}%
+
+                        <!-- Dual Model Scores -->
+                        {% if sbert_enabled %}
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">TF-IDF Similarity</small>
+                                    <div class="progress" style="height: 12px;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ (insights.tfidf_score * 100)|round }}%">
+                                            <small>{{ (insights.tfidf_score * 100)|round(1) }}%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">SBERT Similarity</small>
+                                    {% if insights.sbert_score is not none %}
+                                        <div class="progress" style="height: 12px;">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (insights.sbert_score * 100)|round }}%">
+                                                <small>{{ (insights.sbert_score * 100)|round(1) }}%</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Section Scores -->
+                        <h5 class="mt-4">Section Scores</h5>
+
+                        <small class="text-muted">Skills Match (Weight: 50%)</small>
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (insights.skills_score * 100)|round }}%">
+                                {{ (insights.skills_score * 100)|round }}%
                             </div>
                         </div>
-                        
-                        <h5 class="mt-4">Education Match</h5>
-                        <div class="progress mb-3" style="height: 25px;">
-                            <div class="progress-bar {{ 'bg-success' if insights.education_match.match else 'bg-warning' }}" role="progressbar" style="width: {{ (insights.education_match.score * 100)|round }}%">
-                                {{ (insights.education_match.score * 100)|round }}%
+
+                        <small class="text-muted">Experience Match (Weight: 30%)</small>
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar {{ 'bg-success' if insights.experience_match.match else 'bg-warning' }}" role="progressbar" style="width: {{ (insights.experience_score * 100)|round }}%">
+                                {{ (insights.experience_score * 100)|round }}%
                             </div>
                         </div>
-                        <p class="text-muted">{{ insights.education_match.details }}</p>
-                        
-                        <h5 class="mt-4">Experience Match</h5>
-                        <div class="progress mb-3" style="height: 25px;">
-                            <div class="progress-bar {{ 'bg-success' if insights.experience_match.match else 'bg-warning' }}" role="progressbar" style="width: {{ (insights.experience_match.score * 100)|round }}%">
-                                {{ (insights.experience_match.score * 100)|round }}%
+                        <p class="text-muted small">{{ insights.experience_match.details }}</p>
+
+                        <small class="text-muted">Education Match (Weight: 20%)</small>
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar {{ 'bg-success' if insights.education_match.match else 'bg-warning' }}" role="progressbar" style="width: {{ (insights.education_score * 100)|round }}%">
+                                {{ (insights.education_score * 100)|round }}%
                             </div>
                         </div>
-                        <p class="text-muted">{{ insights.experience_match.details }}</p>
+                        <p class="text-muted small">{{ insights.education_match.details }}</p>
                     </div>
-                    
+
+                    <!-- Right: XAI Feature Breakdown -->
                     <div class="col-md-6">
+                        {% if insights.xai_report %}
                         <div class="card h-100">
                             <div class="card-header bg-light">
-                                <h5 class="card-title mb-0">Skills Analysis</h5>
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-bar me-2 text-primary"></i>
+                                    XAI Feature Contribution Breakdown
+                                </h5>
                             </div>
                             <div class="card-body">
-                                <h6>Matching Skills ({{ insights.matching_skills|length }})</h6>
+                                <!-- Summary -->
+                                <div class="alert alert-light border">
+                                    <small>{{ insights.xai_report.summary }}</small>
+                                </div>
+
+                                <!-- Feature contributions table -->
+                                {% if insights.xai_report.feature_breakdown and insights.xai_report.feature_breakdown.features %}
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Factor</th>
+                                                <th>Score</th>
+                                                <th>Weight</th>
+                                                <th>Contribution</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for feature in insights.xai_report.feature_breakdown.features %}
+                                                <tr class="{{ 'table-info' if feature.informational else '' }}">
+                                                    <td>
+                                                        <i class="fas {{ feature.icon }} text-{{ feature.color }} me-1"></i>
+                                                        {{ feature.name }}
+                                                    </td>
+                                                    <td>{{ (feature.value * 100)|round(1) }}%</td>
+                                                    <td>
+                                                        {% if feature.informational %}
+                                                            <span class="text-muted">—</span>
+                                                        {% else %}
+                                                            {{ (feature.weight * 100)|round(0) }}%
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if feature.informational %}
+                                                            <span class="text-muted">info</span>
+                                                        {% else %}
+                                                            <span class="text-{{ feature.color }}">{{ (feature.contribution * 100)|round(1) }}%</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                            <tr>
+                                                <th colspan="2">Final Score</th>
+                                                <th colspan="2">{{ (insights.xai_report.feature_breakdown.total_score * 100)|round(1) }}%</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                {% endif %}
+
+                                <!-- SHAP-style waterfall -->
+                                {% if insights.xai_report.shap_breakdown %}
+                                    <hr>
+                                    <h6><i class="fas fa-water me-2 text-primary"></i>SHAP-Style Score Decomposition</h6>
+                                    <div class="xai-waterfall">
+                                        <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                            <span class="text-muted">Baseline (mean)</span>
+                                            <span class="badge bg-secondary">{{ (insights.xai_report.shap_breakdown.baseline * 100)|round(1) }}%</span>
+                                        </div>
+                                        {% for item in insights.xai_report.shap_breakdown.contributions %}
+                                            <div class="d-flex justify-content-between align-items-center py-1">
+                                                <span>
+                                                    <i class="fas {{ 'fa-arrow-up text-success' if item.positive else 'fa-arrow-down text-danger' }} me-1"></i>
+                                                    {{ item.name }}
+                                                </span>
+                                                <span class="badge {{ 'bg-success' if item.positive else 'bg-danger' }}">
+                                                    {{ '+' if item.delta >= 0 }}{{ (item.delta * 100)|round(1) }}%
+                                                </span>
+                                            </div>
+                                        {% endfor %}
+                                        <div class="d-flex justify-content-between align-items-center py-1 border-top mt-1">
+                                            <strong>Final Score</strong>
+                                            <span class="badge bg-primary">{{ (insights.xai_report.shap_breakdown.final_score * 100)|round(1) }}%</span>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Skill Badges Row -->
+                {% if insights.xai_report and insights.xai_report.skill_coverage %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-tags me-2 text-primary"></i>
+                                    Skill Gap Analysis
+                                    <span class="badge bg-success ms-2">{{ insights.xai_report.skill_coverage.matched_count }} matched</span>
+                                    <span class="badge bg-danger ms-1">{{ insights.xai_report.skill_coverage.missing_count }} missing</span>
+                                    <span class="badge bg-info ms-1">{{ insights.xai_report.skill_coverage.additional_skills|length }} additional</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted">Coverage: {{ insights.xai_report.skill_coverage.coverage_percentage }}% — Level: <span class="badge {{ 'bg-success' if insights.xai_report.skill_coverage.coverage_level == 'high' else ('bg-warning' if insights.xai_report.skill_coverage.coverage_level == 'moderate' else 'bg-danger') }}">{{ insights.xai_report.skill_coverage.coverage_level }}</span></small>
+                                </div>
+
+                                <h6><i class="fas fa-check-circle text-success me-1"></i>Matched Skills ({{ insights.xai_report.skill_coverage.matched_count }})</h6>
                                 <div class="mb-3">
                                     {% if insights.matching_skills %}
                                         {% for skill in insights.matching_skills %}
-                                            <span class="badge bg-success me-2 mb-2">{{ skill }}</span>
+                                            <span class="badge bg-success me-2 mb-2"><i class="fas fa-check me-1"></i>{{ skill }}</span>
                                         {% endfor %}
                                     {% else %}
                                         <p class="text-muted">No matching skills found</p>
                                     {% endif %}
                                 </div>
-                                
-                                <h6 class="mt-4">Missing Skills ({{ insights.missing_skills|length }})</h6>
+
+                                <h6><i class="fas fa-times-circle text-danger me-1"></i>Missing Skills ({{ insights.xai_report.skill_coverage.missing_count }})</h6>
                                 <div class="mb-3">
                                     {% if insights.missing_skills %}
                                         {% for skill in insights.missing_skills %}
-                                            <span class="badge bg-danger me-2 mb-2">{{ skill }}</span>
+                                            <span class="badge bg-danger me-2 mb-2"><i class="fas fa-times me-1"></i>{{ skill }}</span>
                                         {% endfor %}
                                     {% else %}
-                                        <p class="text-muted">No missing skills - candidate has all required skills!</p>
+                                        <p class="text-muted">No missing skills — candidate has all required skills!</p>
                                     {% endif %}
                                 </div>
-                                
-                                <h6 class="mt-4">Additional Skills</h6>
+
+                                <h6><i class="fas fa-plus-circle text-info me-1"></i>Additional Skills (not in JD)</h6>
                                 <div>
-                                    {% set additional_skills = [] %}
-                                    {% for skill in resume.parsed_data.get('skills', []) %}
-                                        {% if skill not in insights.matching_skills %}
-                                            {% set _ = additional_skills.append(skill) %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    {% if additional_skills %}
-                                        {% for skill in additional_skills %}
-                                            <span class="badge bg-info me-2 mb-2">{{ skill }}</span>
+                                    {% if insights.xai_report.skill_coverage.additional_skills %}
+                                        {% for skill in insights.xai_report.skill_coverage.additional_skills %}
+                                            <span class="badge bg-info me-2 mb-2"><i class="fas fa-plus me-1"></i>{{ skill }}</span>
                                         {% endfor %}
                                     {% else %}
                                         <p class="text-muted">No additional skills detected</p>
@@ -100,9 +240,99 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
-        
+
+        <!-- Fairness / Bias Audit Section -->
+        {% if fairness_result %}
+        <div class="card mb-4">
+            <div class="card-header {{ 'bg-danger' if fairness_result.bias_detected else 'bg-success' }} text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Fairness Audit — Counterfactual Bias Test
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Score Comparison</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Original Score</th>
+                                <td>{{ (fairness_result.original_score * 100)|round(2) }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Anonymised Score</th>
+                                <td>{{ (fairness_result.anonymised_score * 100)|round(2) }}%</td>
+                            </tr>
+                            <tr class="{{ 'table-danger' if fairness_result.bias_detected else 'table-success' }}">
+                                <th>Delta (Score Shift)</th>
+                                <td>{{ (fairness_result.delta * 100)|round(2) }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Bias Threshold</th>
+                                <td>{{ (fairness_result.bias_threshold * 100)|round(1) }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Bias Detected</th>
+                                <td>
+                                    {% if fairness_result.bias_detected %}
+                                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Yes</span>
+                                    {% else %}
+                                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>No</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="alert {{ 'alert-danger' if fairness_result.bias_detected else 'alert-success' }} mb-0">
+                            <i class="fas {{ 'fa-exclamation-circle' if fairness_result.bias_detected else 'fa-check-circle' }} me-2"></i>
+                            {{ fairness_result.interpretation }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5>Masked Proxy Variables</h5>
+                        {% if fairness_result.mask_summary %}
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Proxy Type</th>
+                                        <th>Count</th>
+                                        <th>Original Values</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for proxy_type, values in fairness_result.mask_summary.items() %}
+                                        <tr>
+                                            <td><span class="badge bg-secondary">{{ proxy_type }}</span></td>
+                                            <td>{{ values|length }}</td>
+                                            <td class="small text-muted">
+                                                {{ values[:5]|join(', ') }}
+                                                {% if values|length > 5 %}... (+{{ values|length - 5 }} more){% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted">No proxy variables were masked in this resume.</p>
+                        {% endif %}
+
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>How this works:</strong> The system anonymises sensitive attributes
+                            (name, gender, location, dates, college) and re-scores the resume.
+                            A large delta indicates the matching model may be relying on protected
+                            characteristics rather than skills and experience.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Education & Experience Details -->
         <div class="row">
             <div class="col-md-6">
                 <div class="card mb-4">
@@ -133,7 +363,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
@@ -167,7 +397,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <a href="{{ url_for('recruiter.rank_resumes', jd_id=jd.id) }}" class="btn btn-primary">Back to Rankings</a>
             <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>

@@ -4,20 +4,40 @@
 <div class="row">
     <div class="col-12">
         <h1 class="mb-4">Ranked Resumes</h1>
+
+        <!-- Matching Engine Info -->
+        <div class="alert {{ 'alert-success' if sbert_enabled else 'alert-info' }} mb-3">
+            <i class="fas {{ 'fa-check-circle' if sbert_enabled else 'fa-info-circle' }} me-2"></i>
+            <strong>Matching Engine:</strong>
+            {% if sbert_enabled %}
+                Dual Model (TF-IDF + Sentence-BERT) with Anonymization
+            {% else %}
+                TF-IDF Only <span class="text-muted">(install sentence-transformers to enable SBERT)</span>
+            {% endif %}
+            {% if sbert_enabled %}
+                <span class="badge bg-success ms-2"><i class="fas fa-shield-alt me-1"></i>Fairness: Anonymized</span>
+            {% endif %}
+        </div>
+
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3 class="card-title mb-0">{{ jd.title }} at {{ jd.company }}</h3>
-                    <a href="{{ url_for('recruiter.view_job_description', jd_id=jd.id) }}" class="btn btn-light btn-sm">
-                        <i class="fas fa-eye me-2"></i> View Job Description
-                    </a>
+                    <div class="btn-group">
+                        <a href="{{ url_for('recruiter.export_rankings', jd_id=jd.id) }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-download me-2"></i> Export scores
+                        </a>
+                        <a href="{{ url_for('recruiter.view_job_description', jd_id=jd.id) }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-eye me-2"></i> View Job Description
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i> Resumes are ranked by their similarity to your job description. Click on a resume to view detailed insights.
+                    <i class="fas fa-info-circle me-2"></i> Resumes are ranked by their combined similarity to your job description. Click on a resume to view detailed XAI insights and fairness audit.
                 </div>
-                
+
                 {% if ranked_resumes %}
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -25,33 +45,57 @@
                                 <tr>
                                     <th>Rank</th>
                                     <th>Applicant</th>
-                                    <th>Match Score</th>
+                                    <th>Combined Score</th>
+                                    {% if sbert_enabled %}
+                                        <th>TF-IDF</th>
+                                        <th>SBERT</th>
+                                    {% endif %}
                                     <th>Skills Match</th>
+                                    <th>XAI Summary</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for resume in ranked_resumes %}
                                     <tr>
-                                        <td>{{ loop.index }}</td>
+                                        <td><strong>{{ loop.index }}</strong></td>
                                         <td>{{ resume.user_name }}</td>
                                         <td>
-                                            <div class="progress">
+                                            <div class="progress" style="height: 20px;">
                                                 <div class="progress-bar bg-success" role="progressbar" style="width: {{ (resume.similarity_score * 100)|round }}%">
                                                     {{ (resume.similarity_score * 100)|round }}%
                                                 </div>
                                             </div>
                                         </td>
+                                        {% if sbert_enabled %}
+                                            <td>
+                                                <span class="badge bg-info">{{ (resume.tfidf_score * 100)|round(1) }}%</span>
+                                            </td>
+                                            <td>
+                                                {% if resume.sbert_score is not none %}
+                                                    <span class="badge bg-info">{{ (resume.sbert_score * 100)|round(1) }}%</span>
+                                                {% else %}
+                                                    <span class="text-muted">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
                                         <td>
-                                            <div class="progress">
+                                            <div class="progress" style="height: 20px;">
                                                 <div class="progress-bar bg-primary" role="progressbar" style="width: {{ resume.skills_match_percentage|round }}%">
                                                     {{ resume.skills_match_percentage|round }}%
                                                 </div>
                                             </div>
                                         </td>
+                                        <td class="small text-muted">
+                                            {% if resume.xai_report and resume.xai_report.summary %}
+                                                {{ resume.xai_report.summary[:80] }}{% if resume.xai_report.summary|length > 80 %}...{% endif %}
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
                                         <td>
                                             <a href="{{ url_for('recruiter.resume_insights', jd_id=jd.id, resume_id=resume.resume_id) }}" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-chart-bar me-1"></i> Insights
+                                                <i class="fas fa-chart-bar me-1"></i> XAI Insights
                                             </a>
                                         </td>
                                     </tr>
@@ -66,7 +110,8 @@
                 {% endif %}
             </div>
         </div>
-        
+
+        <!-- Skill Coverage Summary -->
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <h3 class="card-title mb-0">Required Skills Summary</h3>
@@ -82,8 +127,21 @@
                         <p class="text-muted">No specific skills detected in job description</p>
                     {% endif %}
                 </div>
-                
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+
+                <!-- Top Candidate Quick Badges -->
+                {% if ranked_resumes and ranked_resumes[0].xai_report %}
+                    <hr>
+                    <h5>Top Candidate Skill Coverage:</h5>
+                    {% if ranked_resumes[0].xai_report.badges %}
+                        {% for badge in ranked_resumes[0].xai_report.badges %}
+                            <span class="badge {{ badge.class }} me-2 mb-2">
+                                <i class="fas {{ badge.icon }} me-1"></i>{{ badge.skill }}
+                            </span>
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
                     <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
                 </div>
             </div>

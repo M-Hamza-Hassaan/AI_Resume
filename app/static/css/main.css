@@ -49,3 +49,87 @@ main {
   border-color: #4e73df;
   box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
 }
+
+/* ============================================================
+   XAI (Explainable AI) Styles
+   ============================================================ */
+
+/* SHAP-style waterfall breakdown */
+.xai-waterfall {
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+}
+
+.xai-waterfall .border-top {
+  border-top: 2px solid #dee2e6 !important;
+}
+
+/* Feature breakdown table */
+.xai-feature-table td {
+  vertical-align: middle;
+}
+
+/* XAI badge hover effect */
+.badge.bg-success:hover,
+.badge.bg-danger:hover,
+.badge.bg-info:hover {
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+/* ============================================================
+   Fairness Audit Styles
+   ============================================================ */
+
+/* Fairness result table */
+.fairness-score-delta {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Proxy variable badges */
+.proxy-badge {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  margin: 0.15em;
+  font-size: 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+/* Bias detected alert emphasis */
+.alert-bias {
+  border-left: 4px solid #dc3545;
+}
+
+.alert-no-bias {
+  border-left: 4px solid #198754;
+}
+
+/* Dual-model score bars */
+.dual-score-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dual-score-bar .label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  min-width: 80px;
+}
+
+/* ============================================================
+   Matching Engine Banner
+   ============================================================ */
+
+.matching-engine-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}

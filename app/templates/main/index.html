@@ -3,10 +3,11 @@
 {% block content %}
 <div class="row align-items-center">
     <div class="col-md-6">
-        <h1 class="display-4 fw-bold">SmartHire</h1>
-        <h2 class="text-muted">Automated Resume Screening & Ranking System</h2>
+        <h1 class="display-4 fw-bold">airesume</h1>
+        <h2 class="text-muted">AI-Powered Resume Screening & Ranking System</h2>
         <p class="lead mt-4">
-            SmartHire uses advanced NLP and machine learning to match the right candidates with the right jobs.
+            airesume uses advanced NLP, dual-model matching (TF-IDF + Sentence-BERT),
+            explainable AI, and fairness auditing to match the right candidates with the right jobs.
             Upload your resume or job description and let our AI do the work.
         </p>
         <div class="mt-5">
@@ -23,10 +24,55 @@
         </div>
     </div>
     <div class="col-md-6">
-        <img src="{{ url_for('static', filename='img/hero.svg') }}" alt="SmartHire" class="img-fluid">
+        <img src="{{ url_for('static', filename='img/hero.svg') }}" alt="airesume" class="img-fluid"
+             onerror="this.style.display='none'">
     </div>
 </div>
 
+<!-- Key Features -->
+<div class="row mt-5 pt-5">
+    <div class="col-12 text-center">
+        <h2 class="mb-4">Key Features</h2>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Dual Matching</h3>
+                <p class="card-text">TF-IDF keyword matching + Sentence-BERT semantic understanding.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Explainable AI</h3>
+                <p class="card-text">SHAP-style score breakdowns and skill gap analysis for every candidate.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Fairness Audit</h3>
+                <p class="card-text">Counterfactual bias testing and text anonymisation to ensure equitable ranking.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Easy Upload</h3>
+                <p class="card-text">Upload resumes (PDF/DOCX) and job descriptions — let AI handle the rest.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works -->
 <div class="row mt-5 pt-5">
     <div class="col-12 text-center">
         <h2 class="mb-4">How It Works</h2>
@@ -45,7 +91,7 @@
             <div class="card-body text-center">
                 <i class="fas fa-brain fa-3x text-primary mb-3"></i>
                 <h3 class="card-title">Analyze</h3>
-                <p class="card-text">Our AI analyzes and extracts key information.</p>
+                <p class="card-text">Our AI parses, vectorises, and scores candidates using dual models.</p>
             </div>
         </div>
     </div>
@@ -53,8 +99,8 @@
         <div class="card h-100">
             <div class="card-body text-center">
                 <i class="fas fa-check-circle fa-3x text-primary mb-3"></i>
-                <h3 class="card-title">Match</h3>
-                <p class="card-text">Get ranked matches and detailed insights.</p>
+                <h3 class="card-title">Match & Explain</h3>
+                <p class="card-text">Get ranked matches with transparent XAI insights and fairness audits.</p>
             </div>
         </div>
     </div>

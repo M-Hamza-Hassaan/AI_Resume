@@ -62,3 +62,9 @@ class JobDescription:
     def get_by_recruiter_id(recruiter_id):
         jds = mongo.db.job_descriptions.find({'recruiter_id': recruiter_id})
         return [JobDescription(jd) for jd in jds]
+
+    @staticmethod
+    def get_all():
+        """Return all job descriptions in the database."""
+        jds = mongo.db.job_descriptions.find()
+        return [JobDescription(jd) for jd in jds]

@@ -1,203 +1,164 @@
-# 🚀 SmartHire - AI-Powered Resume Screening and Ranking System
+﻿# airesume
 
-SmartHire is a web-based application designed to automate the resume screening and ranking process using advanced Natural Language Processing (NLP) techniques. It enables recruiters to efficiently identify the most suitable candidates by matching parsed resumes with job descriptions.
+![airesume application architecture](https://github.com/M-Hamza-Hassaan/AI_Resume.git/airesume.png)
 
----
+AI-powered resume screening and ranking system for recruiters.
 
-## 🔑 Key Features
+This project is a Flask-based application that helps recruiters review resumes faster, rank candidates against a job description, explain the decision, and audit whether the system is unfairly biased.
 
-- ✅ **Role-Based Authentication**: Secure login system for applicants and recruiters.
-- 📄 **Resume Upload & Parsing**: Extract contact details, skills, education, and experience from uploaded resumes.
-- 📋 **Job Description Management**: Recruiters can upload and manage job descriptions with file support.
-- 🧠 **NLP-Powered Analysis**: Extract and preprocess resume and JD content using spaCy and NLTK.
-- 📊 **Resume-JD Matching**: Score and rank candidates based on skill and content similarity using TF-IDF or BERT + Cosine Similarity.
-- 🔍 **Detailed Match Insights**: Display matched skills, missing skills, and match score per applicant.
-- 🧾 **Admin Dashboard**: Recruiter dashboard to manage uploaded JDs and view applicant matches.
-- 👨‍💻 **User Dashboard**: Applicant dashboard to upload resume, view recommendations, and track applied jobs.
+It was built as a research project and uses a custom spaCy NER model trained on the final dataset file `Entity_Recognition_in_Resumes.json`.
 
 ---
 
-## 🛠️ Tech Stack
+## What the project does
 
-| Layer         | Technology            |
-|---------------|------------------------|
-| Backend       | Python, Flask          |
-| Frontend      | HTML5, CSS3, Bootstrap, Jinja2 Templates |
-| Database      | MongoDB (NoSQL)        |
-| NLP           | spaCy, NLTK, scikit-learn |
-| Resume Matching | TF-IDF / BERT + Cosine Similarity |
-
----
-
-## 📂 Project Directory Structure
-
-```
-smart_hire/
-├── app/
-│   ├── templates/          # Jinja2 HTML templates
-│   ├── static/             # CSS, JS, and assets
-│   ├── routes/             # Route definitions
-│   ├── models/             # DB model wrappers
-│   ├── nlp/                # Resume/JD parsers & matchers
-│   ├── forms/              # Flask-WTF forms
-│   └── __init__.py         # App factory
-├── components
-├── hooks
-├── lib
-├── public
-├── styles
-├── requirements.txt        # Python dependencies
-├── run.py                  # Application entry point
-├── init_db.py              # MongoDB index initializer
-└── README.md               # This documentation
-```
+- Applicants upload a resume in PDF/DOCX format.
+- The system extracts structured information from the resume such as:
+  - name
+  - skills
+  - education
+  - experience
+  - email and phone
+  - designation and company history
+- Recruiters add a Job Description (JD).
+- The app compares each resume to the JD and ranks candidates.
+- The system explains the score using XAI-style contribution breakdowns.
+- It also runs a fairness audit by masking sensitive identity signals and testing score changes.
 
 ---
 
-## 💻 Setup Instructions
+## Research questions and solutions
 
-### 1. Prerequisites
+### RQ1: Can a spaCy NER model extract structured information from resumes?
 
-- Python ≥ 3.8
-- MongoDB (local or Atlas)
-- `pip` (Python package installer)
+Solution:
+- Train a custom spaCy NER model using the Dataturks dataset file `Entity_Recognition_in_Resumes.json`.
+- Extract resume entities such as Name, Skills, Designation, Companies worked at, College Name, Degree, Graduation Year, Email Address, and Location.
+- Use regex fallback for fields that NER may miss.
 
-### 2. Installation
+Relevant files:
+- `Entity_Recognition_in_Resumes.json`
+- `dataturks_dataset.py`
+- `app/nlp/train_ner.py`
+- `app/nlp/parser.py`
+
+### RQ2: Does Sentence-BERT outperform TF-IDF for resume-to-job matching?
+
+
+Solution:
+- Build a dual matching engine using:
+  - TF-IDF baseline matching
+  - Sentence-BERT semantic matching
+- Combine both models into a final ranking score.
+- Weight the final score using skills, experience, and education sections.
+
+Relevant files:
+- `app/nlp/ranker.py`
+- `app/nlp/vectorizer.py`
+- `app/nlp/xai.py`
+
+### RQ3: Can counterfactual testing detect bias in automated screening?
+
+Solution:
+- Mask sensitive text such as names, gender pronouns, dates, college names, and locations.
+- Compare the original score against the anonymized score.
+- If the score changes significantly, the model may be overly dependent on protected or proxy attributes.
+
+Relevant files:
+- `app/nlp/fairness.py`
+
+---
+
+## Project structure
+
+- `app/` — main Flask application
+- `app/routes/` — applicant and recruiter routes
+- `app/models/` — MongoDB models for users, resumes, and job descriptions
+- `app/nlp/` — parsing, ranking, fairness, and training logic
+- `docs/` — supporting technical documentation
+- `Entity_Recognition_in_Resumes.json` — final dataset used for NER training
+- `requirements.txt` — Python dependencies
+- `run.py` — app entry point
+
+---
+
+## How to run the application
+
+### 1) Install dependencies
 
 ```bash
-# Clone the repo
-git clone https://github.com/yourusername/smart-hire.git
-cd smart-hire
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate    # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Download NLP models
-python -m spacy download en_core_web_sm
-python -m spacy download en_core_web_md
 ```
 
-### 3. Configuration
-
-Create a `.env` file in the root:
-
-```
-SECRET_KEY=your_secret_key
-MONGO_URI=mongodb://localhost:27017/smart_hire
-```
-
----
-
-## 🚀 Run the App
+### 2) Install spaCy English model
 
 ```bash
-# Start MongoDB in a new terminal (if running locally)
-mongod
+python -m spacy download en_core_web_sm
+```
 
-# Start the Flask server
+### 3) Make sure MongoDB is running
+
+By default, the app connects to:
+
+```text
+mongodb://localhost:27017/airesume
+```
+
+If needed, update the `MONGO_URI` in the Flask app configuration or environment variables.
+
+### 4) Run the app
+
+```bash
 python run.py
 ```
 
-Visit the app at: [http://localhost:5000](http://localhost:5000)
+Then open:
+
+```text
+http://localhost:5000
+```
 
 ---
 
-## 👤 Usage Guide
+## Optional: retrain the custom NER model
 
-### For Applicants:
+The project uses the final dataset file as-is:
 
-- Register and log in
-- Upload resume (PDF or DOCX)
-- View extracted resume details
-- See personalized job recommendations
+```bash
+python -m app.nlp.train_ner --data "Entity_Recognition_in_Resumes.json" --iter 30
+```
 
-### For Recruiters:
+This saves the trained model under:
 
-- Register and log in
-- Upload job descriptions (with file)
-- View matched applicants and ranking
-- Explore matching insights
+```text
+app/nlp/models/spacy_ner/
+```
 
 ---
 
-## 🧠 Resume-JD Matching Algorithm
+## How the app is used
 
-- **TF-IDF Vectorization**: Converts resume and JD into vector representations
-- **Cosine Similarity**: Measures similarity between resume and JD
-- **Optional**: Swap with BERT embeddings for better semantic matching
-- Score displayed with skill overlap analysis
+### For applicants
 
----
+1. Register as an applicant.
+2. Upload a resume.
+3. The resume is parsed and structured.
+4. The candidate profile is stored for ranking.
 
-## 🖼️ Screenshots
+### For recruiters
 
-> 📸 Add screenshots in a `screenshots/` folder and reference them here:
-
-### 🏠 Home Page
-
-![Home](screenshots/Index_Page.png)
-
-### 👤 User Login
-
-![User Login](screenshots/User_Login.png)
-
-### 📝 User Dashboard
-
-![User Dashboard](screenshots/User_Dashboard.png)
-
-### 📄 Admin Login
-
-![Admin Login](screenshots/Admin_Login.png)
-
-### 📊 Admin Dashboard
-
-![Admin Dashboard](screenshots/Admin_Dashboard.png)
-
-### 📊 Block Diagram
-
-![Block Diagram](screenshots/block.jpg)
+1. Register as a recruiter.
+2. Add a job description.
+3. Rank all resumes for that JD.
+4. Review the ranked candidates.
+5. Open XAI insights to understand score explanations.
+6. Review fairness audit results for bias detection.
 
 ---
 
-## 🗃️ Database Collections
+## Notes
 
-| Collection   | Key Fields |
-|--------------|------------|
-| `users`      | `_id`, `fullname`, `email`, `password` |
-| `admins`     | `_id`, `fullname`, `email`, `password` |
-| `resumes`    | `_id`, `user_id`, `file_name`, `file_path`, `extracted_details` |
-| `jobs`       | `_id`, `job_title`, `company_name`, `location`, `admin_id`, `file_path` |
-| `applications` | `_id`, `user_id`, `job_id`, `match_score`, `status` |
+- This is a research prototype and academic project, not a production HR platform.
+- The project keeps the final dataset file as the authoritative source and does not rely on duplicate or cleaned dataset variants.
+- Additional documentation is available in the `docs/` folder.
 
----
-
-## 📌 Todo / Roadmap
-
-- [x] Resume Upload and Parsing
-- [x] JD Upload and Management
-- [x] Role-based Auth System
-- [x] Resume-JD Matching System
-- [ ] Apply-to-Job System
-- [ ] Candidate Application Tracker
-- [ ] JD Parsing (Optional via EdenAI)
-- [ ] Advanced BERT Matching Option
-
----
-
-## 📃 License
-
-MIT License. See [LICENSE](LICENSE) for more.
-
----
-
-## 🙌 Acknowledgements
-
-- [spaCy](https://spacy.io/)
-- [MongoDB](https://www.mongodb.com/)
-- [EdenAI Resume Parser](https://www.edenai.co/)
-- [Bootstrap](https://getbootstrap.com/)
-- [Flask](https://flask.palletsprojects.com/)

@@ -14,28 +14,31 @@ def register():
     form = RegistrationForm()
     
     if form.validate_on_submit():
-        # Check if email already exists
-        existing_user = User.get_by_email(form.email.data)
-        if existing_user:
-            flash('Email already registered. Please login.', 'danger')
+        try:
+            # Check if email already exists
+            existing_user = User.get_by_email(form.email.data)
+            if existing_user:
+                flash('Email already registered. Please login.', 'danger')
+                return redirect(url_for('auth.login'))
+            
+            # Hash password
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            
+            # Create new user
+            user_data = {
+                'name': form.name.data,
+                'email': form.email.data,
+                'password': hashed_password,
+                'role': form.role.data
+            }
+            
+            # Insert user into database
+            user_id = mongo.db.users.insert_one(user_data).inserted_id
+            
+            flash('Account created successfully! You can now login.', 'success')
             return redirect(url_for('auth.login'))
-        
-        # Hash password
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        
-        # Create new user
-        user_data = {
-            'name': form.name.data,
-            'email': form.email.data,
-            'password': hashed_password,
-            'role': form.role.data
-        }
-        
-        # Insert user into database
-        user_id = mongo.db.users.insert_one(user_data).inserted_id
-        
-        flash('Account created successfully! You can now login.', 'success')
-        return redirect(url_for('auth.login'))
+        except Exception as e:
+            flash(f'Registration error: {str(e)}', 'danger')
     
     return render_template('auth/register.html', title='Register', form=form)
 

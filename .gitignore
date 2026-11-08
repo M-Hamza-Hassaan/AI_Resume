@@ -1,28 +1,25 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
 
-# dependencies
-/node_modules
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
+# Virtual environment
 venv/
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files
+# Environment variables
 .env*
 
-# vercel
-.vercel
+# Uploads (user resume files — keep directory, ignore contents)
+app/uploads/*
+!app/uploads/.gitkeep
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# spaCy / NLP model artifacts
+*.pkl
+!app/nlp/models/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
