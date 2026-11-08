@@ -1,6 +1,6 @@
 ﻿# airesume
 
-![airesume application architecture](https://github.com/M-Hamza-Hassaan/AI_Resume.git/airesume.png)
+![airesume application architecture](airesume.png)
 
 AI-powered resume screening and ranking system for recruiters.
 
