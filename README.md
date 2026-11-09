@@ -1,8 +1,8 @@
-﻿# airesume
+﻿# AI-powered resume screening and ranking system for recruiters.
+
+Technical Explanation: https://www.youtube.com/watch?v=IIVtJ4vOCNI&t=74s
 
 ![airesume application architecture](airesume.png)
-
-AI-powered resume screening and ranking system for recruiters.
 
 This project is a Flask-based application that helps recruiters review resumes faster, rank candidates against a job description, explain the decision, and audit whether the system is unfairly biased.
 
